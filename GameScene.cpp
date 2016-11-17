@@ -47,19 +47,44 @@ bool GameScene::init()
 	//auto listenertouch = EventListenerTouchOneByOne::create();//触摸监听
 
 	scheduleUpdate();
+
+	initKeyCodeMap();
 	return true;
+}
+
+void GameScene::initKeyCodeMap()
+{
+	//w -> ↑
+	keycode_mapping.insert(std::make_pair(EventKeyboard::KeyCode::KEY_W, EventKeyboard::KeyCode::KEY_UP_ARROW));
+	//s -> ↓
+	keycode_mapping.insert(std::make_pair(EventKeyboard::KeyCode::KEY_S, EventKeyboard::KeyCode::KEY_DOWN_ARROW));
+	//a -> ←
+	keycode_mapping.insert(std::make_pair(EventKeyboard::KeyCode::KEY_A, EventKeyboard::KeyCode::KEY_LEFT_ARROW));
+	//d -> →
+	keycode_mapping.insert(std::make_pair(EventKeyboard::KeyCode::KEY_D, EventKeyboard::KeyCode::KEY_RIGHT_ARROW));
 }
 
 void GameScene::onKeyPressed(EventKeyboard::KeyCode keycode, cocos2d::Event *event)
 {
 	//CCLOG("keyboard pressed -> code = 0x%04x", keycode);
-	pressed_keys.insert(keycode);
+	KeyCodeMap::iterator it = keycode_mapping.find(keycode);
+	if (it != keycode_mapping.end()){
+		pressed_keys.insert(it->second);
+	}else{
+		pressed_keys.insert(keycode);
+	}
 }
 
 void GameScene::onKeyReleased(EventKeyboard::KeyCode keycode, cocos2d::Event *event)
 {
+	KeyCodeMap::iterator it = keycode_mapping.find(keycode);
+	if (it != keycode_mapping.end()){
+		pressed_keys.erase(it->second);
+	}
+	else{
+		pressed_keys.erase(keycode);
+	}
 	//CCLOG("keyboard released <- code = 0x%04x", keycode);
-	pressed_keys.erase(keycode);
 }
 
 void GameScene::onMouseDown(EventMouse* event)
@@ -78,11 +103,9 @@ void GameScene::onMouseUp(EventMouse* event)
 void GameScene::update(float delta)
 {
 	float steps = delta * 60 *2;
-	Vec2 movevec = Vec2::ZERO;
-	for (KeyCodeSet::iterator it = pressed_keys.begin(); it != pressed_keys.end(); it++)
-	{
-		switch (*it)
-		{
+	Vec2 movevec = Vec2::ZERO;//移动方向
+	for (KeyCodeSet::iterator it = pressed_keys.begin(); it != pressed_keys.end(); it++){
+		switch (*it){
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 			movevec += Vec2::UNIT_Y;
 			break;
@@ -99,5 +122,7 @@ void GameScene::update(float delta)
 			break;
 		}
 	}
-	my_drawNode->setPosition(my_drawNode->getPosition()+movevec*steps);
+	if (Vec2::ZERO != movevec){//是否移动
+		my_drawNode->setPosition(my_drawNode->getPosition() + movevec*steps);
+	}
 }
