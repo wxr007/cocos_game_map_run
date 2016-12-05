@@ -42,6 +42,10 @@ private:
 	//mapping the keycode
 	//°´¼üÓ³Éä
 	KeyCodeMap keycode_mapping;
+
+	cocos2d::Sprite* my_sprite;
+
+	cocos2d::TMXTiledMap* map;
 };
 
 #endif // __GAME_SCENE_H__
